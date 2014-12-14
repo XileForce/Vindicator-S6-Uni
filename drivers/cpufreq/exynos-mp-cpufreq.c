@@ -26,6 +26,7 @@
 #include <linux/reboot.h>
 #include <linux/delay.h>
 #include <linux/cpu.h>
+#include <linux/ipa.h>
 #include <linux/pm_qos.h>
 #include <linux/kobject.h>
 #include <linux/sysfs.h>
@@ -267,6 +268,9 @@ static ssize_t store_volt_table(struct kobject *kobj, struct attribute *attr,
 			buf += offset;
 		}
 	}
+	
+	ipa_update();
+	
 	return count;
 }
 
