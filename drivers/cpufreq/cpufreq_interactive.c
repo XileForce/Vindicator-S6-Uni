@@ -1335,7 +1335,8 @@ static ssize_t store_hispeed_freq(struct cpufreq_interactive_tunables *tunables,
 #ifdef CONFIG_MODE_AUTO_CHANGE
 	unsigned long flags_idx;
 #endif
-	ret = strict_strtoul(buf, 0, &val);
+
+	ret = kstrtoul(buf, 0, &val);
 	if (ret < 0)
 		return ret;
 #ifdef CONFIG_MODE_AUTO_CHANGE
@@ -1368,7 +1369,8 @@ static ssize_t store_go_hispeed_load(struct cpufreq_interactive_tunables
 #ifdef CONFIG_MODE_AUTO_CHANGE
 	unsigned long flags_idx;
 #endif
-	ret = strict_strtoul(buf, 0, &val);
+
+	ret = kstrtoul(buf, 0, &val);
 	if (ret < 0)
 		return ret;
 #ifdef CONFIG_MODE_AUTO_CHANGE
@@ -1401,7 +1403,8 @@ static ssize_t store_min_sample_time(struct cpufreq_interactive_tunables
 #ifdef CONFIG_MODE_AUTO_CHANGE
 	unsigned long flags_idx;
 #endif
-	ret = strict_strtoul(buf, 0, &val);
+
+	ret = kstrtoul(buf, 0, &val);
 	if (ret < 0)
 		return ret;
 #ifdef CONFIG_MODE_AUTO_CHANGE
@@ -1434,7 +1437,8 @@ static ssize_t store_timer_rate(struct cpufreq_interactive_tunables *tunables,
 #ifdef CONFIG_MODE_AUTO_CHANGE
 	unsigned long flags_idx;
 #endif
-	ret = strict_strtoul(buf, 0, &val);
+
+	ret = kstrtoul(buf, 0, &val);
 	if (ret < 0)
 		return ret;
 #ifdef CONFIG_MODE_AUTO_CHANGE
@@ -1592,7 +1596,7 @@ static ssize_t store_enforced_mode(struct cpufreq_interactive_tunables
 	int ret;
 	long unsigned int val;
 
-	ret = strict_strtoul(buf, 0, &val);
+	ret = kstrtoul(buf, 0, &val);
 	if (ret < 0)
 		return ret;
 
