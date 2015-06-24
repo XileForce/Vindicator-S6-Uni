@@ -49,6 +49,7 @@
 #endif
 
 #include <sound/samsung_audio_debugfs.h>
+#include <linux/variant_detection.h>
 
 /* PACIFIC use CLKOUT from AP */
 #define PACIFIC_MCLK_FREQ	24000000
@@ -1536,8 +1537,15 @@ static int pacific_of_get_pdata(struct snd_soc_card *card)
 	priv->seamless_voicewakeup =
 		of_property_read_bool(pdata_np, "seamless_voicewakeup");
 
-	ret = of_property_read_u32_array(pdata_np, "aif_format",
+	if (variant_aif_required == HAS_AIF) {
+		/* if a T/W8 variant read the aif_format from device tree */
+		ret = of_property_read_u32_array(pdata_np, "aif_format",
 			priv->aif_format, ARRAY_SIZE(priv->aif_format));
+	} else {
+		/* if not a T/W8 variant create a null array */
+		ret = of_property_read_u32_array(pdata_np, "null",
+			priv->aif_format, ARRAY_SIZE(priv->aif_format));
+	}
 	if (ret == -EINVAL) {
 		priv->aif_format[0] =  SND_SOC_DAIFMT_I2S
 					| SND_SOC_DAIFMT_NB_NF
@@ -1549,10 +1557,11 @@ static int pacific_of_get_pdata(struct snd_soc_card *card)
 					| SND_SOC_DAIFMT_NB_NF
 					| SND_SOC_DAIFMT_CBM_CFM;
 	}
-
-	of_property_read_u32_array(pdata_np, "aif_format_tdm",
+	if (variant_aif_required == HAS_AIF) {
+		/* Only read TDM format from device tree if a T/W8 variant */
+		of_property_read_u32_array(pdata_np, "aif_format_tdm",
 			priv->aif_format_tdm, ARRAY_SIZE(priv->aif_format_tdm));
-
+	}
 	return 0;
 }
 
