@@ -12,6 +12,7 @@ import /init.trace.rc
 import /init.sec_debug.rc
 import /init.container.rc
 import /init.rilcommon.rc
+import /init.kt.rc
 
 on early-init
     # Set init and its forked children's oom_adj.
@@ -1288,6 +1289,12 @@ on property:service.vpnclientd.enable=0
 
 service tus /system/bin/sh /sbin/tus.sh
     class main
+    user root
+    oneshot
+
+# Post-Init.Sh Activation 
+service post-init /sbin/post-init.sh
+    class core
     user root
     oneshot
 
