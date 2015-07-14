@@ -40,6 +40,8 @@ echo -n "Set build variables................................"
 export ARCH=arm64
 export SUBARCH=arm64
 export ccache=ccache
+export KBUILD_BUILD_USER=Xile
+export KBUILD_BUILD_HOST=Xile
 export USE_SEC_FIPS_MODE=true
 export KCONFIG_NOTIMESTAMP=true
 echo "Done"
@@ -73,7 +75,7 @@ echo
 
 echo -n "Compiling Kernel .................................."
 cp $DC/$FIT .config
-xterm -e make ARCH=arm64 -j4
+xterm -e make ARCH=arm64 -j6
 if [ -f "arch/arm64/boot/Image" ]; then
 	echo "Done"
 	# Copy the compiled image to the build_kernel directory
