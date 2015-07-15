@@ -3930,7 +3930,7 @@ static inline int hmp_semiboost(void)
  * with /sys/kernel/hmp/packing_enable
  */
 unsigned int hmp_packing_enabled = 1;
-unsigned int hmp_full_threshold = 650;
+unsigned int hmp_full_threshold = 250;
 #endif
 
 static unsigned int hmp_up_migration(int cpu, int *target_cpu, struct sched_entity *se);
