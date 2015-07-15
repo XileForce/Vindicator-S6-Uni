@@ -78,6 +78,7 @@
 #else
 #define dt2w_switch 0
 #endif
+#define FTS_I2C_RETRY 10
 
 static struct i2c_driver fts_i2c_driver;
 
@@ -149,6 +150,7 @@ int fts_write_reg(struct fts_ts_info *info,
 {
 	struct i2c_msg xfer_msg[2];
 	int ret;
+	int retry = 0;
 
 	if (info->touch_stopped) {
 		tsp_debug_err(true, &info->client->dev, "%s: Sensor stopped\n", __func__);
@@ -170,8 +172,15 @@ int fts_write_reg(struct fts_ts_info *info,
 	xfer_msg[0].flags = 0;
 	xfer_msg[0].buf = reg;
 
-	ret = i2c_transfer(info->client->adapter, xfer_msg, 1);
+	for (retry = 0; retry <= FTS_I2C_RETRY; retry++) {
+		ret = i2c_transfer(info->client->adapter, xfer_msg, 1);
+		if (ret == 1) {
+			goto out;
+		} else
+			msleep(10);
+	}
 
+ out:
 	mutex_unlock(&info->i2c_mutex);
 	return ret;
 
@@ -184,6 +193,7 @@ int fts_read_reg(struct fts_ts_info *info, unsigned char *reg, int cnum,
 {
 	struct i2c_msg xfer_msg[2];
 	int ret;
+	int retry = 0;
 
 	if (info->touch_stopped) {
 		tsp_debug_err(true, &info->client->dev, "%s: Sensor stopped\n", __func__);
@@ -210,8 +220,15 @@ int fts_read_reg(struct fts_ts_info *info, unsigned char *reg, int cnum,
 	xfer_msg[1].flags = I2C_M_RD;
 	xfer_msg[1].buf = buf;
 
-	ret = i2c_transfer(info->client->adapter, xfer_msg, 2);
+	for (retry = 0; retry <= FTS_I2C_RETRY; retry++) {
+		ret = i2c_transfer(info->client->adapter, xfer_msg, 2);
+		if (ret == 2) {
+			goto out;
+		} else
+			msleep(10);
+	}
 
+ out:
 	mutex_unlock(&info->i2c_mutex);
 	return ret;
 
@@ -268,6 +285,7 @@ static int fts_write_to_string(struct fts_ts_info *info,
 	struct i2c_msg xfer_msg[3];
 	unsigned char *regAdd;
 	int ret;
+	int retry = 0;
 
 	if (info->touch_stopped) {
 		   tsp_debug_err(true, &info->client->dev, "%s: Sensor stopped\n", __func__);
@@ -309,7 +327,14 @@ static int fts_write_to_string(struct fts_ts_info *info,
 	xfer_msg[1].buf = &regAdd[3];
 /* msg[1], length 4*/
 
-	ret = i2c_transfer(info->client->adapter, xfer_msg, 2);
+	for (retry = 0; retry <= FTS_I2C_RETRY; retry++) {
+		ret = i2c_transfer(info->client->adapter, xfer_msg, 2);
+		if (ret == 2)
+			break;
+		else
+			msleep(10);
+	}
+
 	if (ret == 2) {
 		tsp_debug_info(true, &info->client->dev,
 				"%s: string command is OK.\n", __func__);
@@ -323,7 +348,14 @@ static int fts_write_to_string(struct fts_ts_info *info,
 		xfer_msg[0].flags = 0;
 		xfer_msg[0].buf = regAdd;
 
-		ret = i2c_transfer(info->client->adapter, xfer_msg, 1);
+		for (retry = 0; retry <= FTS_I2C_RETRY; retry++) {
+			ret = i2c_transfer(info->client->adapter, xfer_msg, 1);
+			if (ret == 1)
+				break;
+			else
+				msleep(10);
+		}
+
 		if (ret != 1)
 			tsp_debug_info(true, &info->client->dev,
 					"%s: string notify is failed.\n", __func__);
