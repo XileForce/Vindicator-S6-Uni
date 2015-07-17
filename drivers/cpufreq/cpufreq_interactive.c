@@ -51,6 +51,8 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/cpufreq_interactive.h>
 
+bool screen_is_on = true;
+
 struct cpufreq_interactive_cpuinfo {
 	struct timer_list cpu_timer;
 	struct timer_list cpu_slack_timer;
@@ -89,7 +91,11 @@ static spinlock_t regionchange_cpumask_lock;
 #define DEFAULT_TARGET_LOAD 90
 static unsigned int default_target_loads[] = {DEFAULT_TARGET_LOAD};
 
-#define DEFAULT_TIMER_RATE (20 * USEC_PER_MSEC)
+#define DEFAULT_TIMER_RATE (30 * USEC_PER_MSEC)
+
+#define DEFAULT_SCREEN_OFF_MAX 700000
+static unsigned long screen_off_max = DEFAULT_SCREEN_OFF_MAX;
+
 #define DEFAULT_ABOVE_HISPEED_DELAY DEFAULT_TIMER_RATE
 static unsigned int default_above_hispeed_delay[] = {
 	DEFAULT_ABOVE_HISPEED_DELAY };
@@ -175,7 +181,11 @@ struct cpufreq_interactive_tunables {
 	 */
 #define DEFAULT_TIMER_SLACK (4 * DEFAULT_TIMER_RATE)
 	int timer_slack_val;
+	
 	bool io_is_busy;
+	
+
+
 
 #define TASK_NAME_LEN 15
 	/* realtime thread handles frequency scaling */
@@ -1033,6 +1043,9 @@ static int cpufreq_interactive_speedchange_task(void *data)
 				if (pjcpu->target_freq > max_freq)
 					max_freq = pjcpu->target_freq;
 			}
+			
+			if (unlikely(!screen_is_on))
+					if (max_freq > screen_off_max) max_freq = screen_off_max;
 
 			if (max_freq != pcpu->policy->cur) {
 				u64 now;
@@ -1556,6 +1569,25 @@ static ssize_t store_boostpulse_duration(struct cpufreq_interactive_tunables
 	return count;
 }
 
+static ssize_t show_screen_off_maxfreq(struct kobject *kobj,
+                                       char *buf)
+ {
+         return sprintf(buf, "%lu\n", screen_off_max);
+ }
+ 
+static ssize_t store_screen_off_maxfreq(struct kobject *kobj,
+                                        const char *buf, size_t count)
+ {
+         int ret;
+         unsigned long val;
+ 
+         ret = strict_strtoul(buf, 0, &val);
+         if (ret < 0) return ret;
+         if (val < 200000) screen_off_max = DEFAULT_SCREEN_OFF_MAX;
+         else screen_off_max = val;
+         return count;
+ }
+
 static ssize_t show_io_is_busy(struct cpufreq_interactive_tunables *tunables,
 		char *buf)
 {
@@ -1932,6 +1964,7 @@ show_store_gov_pol_sys(timer_slack);
 show_store_gov_pol_sys(boost);
 store_gov_pol_sys(boostpulse);
 show_store_gov_pol_sys(boostpulse_duration);
+show_store_gov_pol_sys(screen_off_maxfreq);
 show_store_gov_pol_sys(io_is_busy);
 
 #ifdef CONFIG_MODE_AUTO_CHANGE
@@ -1974,6 +2007,7 @@ gov_sys_pol_attr_rw(timer_rate);
 gov_sys_pol_attr_rw(timer_slack);
 gov_sys_pol_attr_rw(boost);
 gov_sys_pol_attr_rw(boostpulse_duration);
+gov_sys_pol_attr_rw(screen_off_maxfreq);
 gov_sys_pol_attr_rw(io_is_busy);
 #ifdef CONFIG_MODE_AUTO_CHANGE
 gov_sys_pol_attr_rw(mode);
@@ -2023,6 +2057,7 @@ static struct attribute *interactive_attributes_gov_sys[] = {
 	&boost_gov_sys.attr,
 	&boostpulse_gov_sys.attr,
 	&boostpulse_duration_gov_sys.attr,
+	&screen_off_maxfreq_gov_sys.attr,
 	&io_is_busy_gov_sys.attr,
 #ifdef CONFIG_MODE_AUTO_CHANGE
 	&mode_gov_sys.attr,
@@ -2063,6 +2098,7 @@ static struct attribute *interactive_attributes_gov_pol[] = {
 	&boost_gov_pol.attr,
 	&boostpulse_gov_pol.attr,
 	&boostpulse_duration_gov_pol.attr,
+	&screen_off_maxfreq_gov_pol.attr,
 	&io_is_busy_gov_pol.attr,
 #ifdef CONFIG_MODE_AUTO_CHANGE
 	&mode_gov_pol.attr,
@@ -2103,6 +2139,7 @@ static const char *interactive_sysfs[] = {
 	"boost",
 	"boostpulse",
 	"boostpulse_duration",
+	"screen_off_maxfreq",
 	"io_is_busy",
 #ifdef CONFIG_MODE_AUTO_CHANGE
 	"mode",
@@ -2543,7 +2580,7 @@ static int cpufreq_governor_interactive(struct cpufreq_policy *policy,
 static
 #endif
 struct cpufreq_governor cpufreq_gov_interactive = {
-	.name = "interactive",
+	.name = "interactiveX",
 	.governor = cpufreq_governor_interactive,
 	.max_transition_latency = 10000000,
 	.owner = THIS_MODULE,
@@ -2772,6 +2809,8 @@ static int __init cpufreq_interactive_init(void)
 {
 	unsigned int i;
 	struct cpufreq_interactive_cpuinfo *pcpu;
+	
+	screen_is_on = true;
 
 	/* Initalize per-cpu timers */
 	for_each_possible_cpu(i) {
