@@ -588,6 +588,8 @@ on boot
     chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/param_index
     chown system system /sys/devices/system/cpu/cpufreq/interactive/cpu_util
     chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/cpu_util
+    chown system system /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq
+    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/screen_off_maxfreq
 
     # Change permission for dvfshelper
     chown radio system /sys/power/cpufreq_table
