@@ -65,8 +65,13 @@ on init
     mkdir /storage/Private 0000 system system
 
 on post-fs
-    # Increase max readahead size to 256 KB
-    write /sys/block/sda/queue/read_ahead_kb 256
+    # Set max readahead size to 64 KB
+    write /sys/block/sda/queue/read_ahead_kb 64
+    write /sys/block/sdb/queue/read_ahead_kb 64
+    write /sys/block/sdc/queue/read_ahead_kb 64
+    write /sys/block/sda/queue/read_ahead_kb 64
+    write /sys/block/vnswap0/queue/read_ahead_kb 64
+    write /sys/devices/virtual/bdi/253:0/read_ahead_kb 64
 
 on post-fs-data
     mkdir /data/media 0770 media_rw media_rw
@@ -166,8 +171,8 @@ on post-fs-data
 on boot
     # override init.rc to keep plenty of large order chunks around
     # to improve allocation times
-#    write /proc/sys/vm/min_free_kbytes 32768
-#    write /proc/sys/vm/min_free_order_shift 1
+    write /proc/sys/vm/min_free_kbytes 32768
+    write /proc/sys/vm/min_free_order_shift 1
 
     #setprop ro.radio.noril yes
 
@@ -293,8 +298,6 @@ on boot
 
     chown system system sys/devices/system/cpu/cpufreq/mp-cpufreq/cluster0_max_freq
     chmod 0660 sys/devices/system/cpu/cpufreq/mp-cpufreq/cluster0_max_freq
-    chown system system sys/devices/system/cpu/cpufreq/mp-cpufreq/boot_low_freq
-    chmod 0660 sys/devices/system/cpu/cpufreq/mp-cpufreq/boot_low_freq
 
     # Cluster1 (Atlas)
     chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/timer_rate
@@ -835,13 +838,10 @@ on property:sys.sysctl.compact_memory=1
 on property:ro.use_data_netmgrd=true
     start netmgrd
 
-#
-# start multiple rilds based on multisim property
-#
-#on property:ro.multisim.simslotcount=2
-#    stop ril-daemon
-#    start ril-daemon
-#    start ril-daemon1
+on property:ro.multisim.simslotcount=2
+    stop ril-daemon
+    start ril-daemon
+    start ril-daemon1
 
 # LPM
 on property:ro.bootmode=charger
