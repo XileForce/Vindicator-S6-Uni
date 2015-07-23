@@ -27,7 +27,7 @@ echo "1) cpu frequency control"
 echo
 echo "2) Enable/Disable Power Efficient Workqueues"
 echo
-echo "3) Enable/Disable FSync"
+echo "3) Enable/Disable SensorHub Wakelock"
 echo
 echo "4) Enable/Disable CPU Task Packing On LITTLE CPU's (Currently Unused)"
 echo
@@ -60,8 +60,8 @@ case $option in
 	echo "2) Power Efficient Workqueues: "
 	cat /sys/module/workqueue/parameters/power_efficient
 	echo
-	echo "3) FSync: "
-	cat /sys/module/sync/parameters/fsync_enabled
+	echo "3) SensorHub Wakelock: "
+	cat /sys/module/wakeup/parameters/enable_sensorhub_wl
 	echo
 	echo "4) LITTLE CPU Task Packing: "
 	cat /sys/kernel/hmp/packing_enable
@@ -173,21 +173,23 @@ case $option in
 	;;
 	
 3)
-	echo -n "FSync Off Provides A Significant Boost To IO"
+	echo -n "The SensorHub Wakelock Is One Of The Biggest Wake Sources"
 	echo
-	echo -n "FSync On Provides Better Data Integrity In The Event Of Crash"
+	echo -n "Disable For Better Deep Sleep And Less Awake Time, Enable For Stock Behavior"
 	echo
-	echo -n "Select 0 To Disable FSync, Select 1 To Enable(Default)"
+	echo -n "Disabling May Break Things! If You Have Weird Issues, Re Enable It Before Reporting!"
+	echo
+	echo -n "Select 0 To Disable SensorHub WakeLock, Select 1 To Enable(Default)"
 	echo
 	read select
 	case $select in
 	  0)
-		echo N > /sys/module/sync/parameters/fsync_enabled
-		echo N > $VKdata/FSync
+		echo N > /sys/module/wakeup/parameters/enable_sensorhub_wl
+		echo N > $VKdata/SHWL
 		;;
 	  1)
-		echo Y > /sys/module/sync/parameters/fsync_enabled
-		echo Y > $VKdata/FSync
+		echo Y > /sys/module/wakeup/parameters/enable_sensorhub_wl
+		echo Y > $VKdata/SHWL
 		;;
 	  *) mc=0;;
 	esac
