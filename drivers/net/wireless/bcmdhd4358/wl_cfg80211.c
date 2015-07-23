@@ -4277,6 +4277,10 @@ wl_cfg80211_connect(struct wiphy *wiphy, struct net_device *dev,
 			wait_cnt--;
 			OSL_SLEEP(10);
 		}
+		if (wl_get_drv_status(cfg, DISCONNECTING, dev)) {
+			WL_ERR(("Force clear DISCONNECTING status!\n"));
+			wl_clr_drv_status(cfg, DISCONNECTING, dev);
+		}
 	}
 
 	/* Clean BSSID */
@@ -10980,11 +10984,12 @@ static void wl_del_roam_timeout(struct bcm_cfg80211 *cfg)
 static void wl_roam_timeout(unsigned long data)
 {
 	struct bcm_cfg80211 *cfg = (struct bcm_cfg80211 *)data;
+	dhd_pub_t *dhdp = (dhd_pub_t *)(cfg->pub);
 
 	WL_ERR(("roam timer expired\n"));
 
 	/* restore prec_map to ALLPRIO */
-	wl_del_roam_timeout(cfg);
+	dhdp->dequeue_prec_map = ALLPRIO;
 }
 
 #endif /* DHD_LOSSLESS_ROAMING */
@@ -11744,6 +11749,7 @@ wl_notifier_change_state(struct bcm_cfg80211 *cfg, struct net_info *_net_info,
 			if (cfg->pm_enable_work_on) {
 				wl_add_remove_pm_enable_work(cfg, FALSE, WL_HANDLER_DEL);
 			}
+
 
 		}
 #if defined(WLTDLS)
