@@ -65,7 +65,7 @@ if [ "$xc" = "X" -o "$xc" = "x" ]; then
 	# Make and xconfig our defconfig
 	echo -n "Loading xconfig ..................................."
 	cp $DC/$FIT .config
-	xterm -e make ARCH=arm64 xconfig
+	make ARCH=arm64 xconfig
 	echo "Done"
 	mv .config $DC/$FIT
 fi
@@ -75,7 +75,7 @@ echo
 
 echo -n "Compiling Kernel .................................."
 cp $DC/$FIT .config
-xterm -e make ARCH=arm64 -j6
+make ARCH=arm64 -j6
 if [ -f "arch/arm64/boot/Image" ]; then
 	echo "Done"
 	# Copy the compiled image to the build_kernel directory
@@ -130,7 +130,7 @@ echo "Done"
 
 echo -n "Creating flashable zip............................."
 cd $OUT #move to output directory
-xterm -e zip -r Vindicator-Uni-Rx.zip *
+zip -r Vindicator-Uni-Rx.zip *
 echo "Done"
 
 ###################################### OPTIONAL SOURCE CLEAN ###################################
@@ -139,8 +139,8 @@ echo
 cd ../../
 read -p "Do you want to Clean the source? (y/n) > " mc
 if [ "$mc" = "Y" -o "$mc" = "y" ]; then
-	xterm -e make clean
-	xterm -e make mrproper
+	make clean
+	make mrproper
 fi
 
 ############################################# CLEANUP ##########################################
