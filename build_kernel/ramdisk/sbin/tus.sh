@@ -27,7 +27,7 @@ echo "20000" 	> /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_enter_tim
 echo "30000" 	> /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_exit_time
 echo "20000" 	> /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_enter_time
 echo "30000" 	> /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_exit_time
-echo "90" 	> /sys/devices/system/cpu/cpu0/cpufreq/interactive/target_loads
+echo "85" 	> /sys/devices/system/cpu/cpu0/cpufreq/interactive/target_loads
 echo "20000" 	> /sys/devices/system/cpu/cpu0/cpufreq/interactive/timer_rate
 echo "15000" 	> /sys/devices/system/cpu/cpu0/cpufreq/interactive/timer_slack
 
@@ -44,4 +44,7 @@ echo "30000" 	> /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_exit_tim
 echo "90" 	> /sys/devices/system/cpu/cpu4/cpufreq/interactive/target_loads
 echo "20000" 	> /sys/devices/system/cpu/cpu4/cpufreq/interactive/timer_rate
 echo "15000" 	> /sys/devices/system/cpu/cpu4/cpufreq/interactive/timer_slack
+
+#Set Power Aware Scheduling Off By Default
+echo "0" > /sys/kernel/hmp/power_migration
 
