@@ -15,6 +15,8 @@ ccflags-y := -shared -fno-common -fno-builtin
 ccflags-y += -nostdlib -Wl,-soname=linux-vdso.so.1 \
 		$(call cc-ldoption, -Wl$(comma)--hash-style=sysv)
 
+ccflags-y += -Wl,-shared
+
 obj-y += vdso.o
 extra-y += vdso.lds vdso-offsets.h
 CPPFLAGS_vdso.lds += -P -C -U$(ARCH)
